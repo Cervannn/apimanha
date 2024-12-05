@@ -8,15 +8,15 @@ const db = mysql.createPool({
     password: process.env.DB_PASSWORD,
     database: process.env.DB_NAME
 
-})
-(async () => {
-    try {
-        const connection = await db.getConnection();
-        console.log('Conexão com o banco de dados estabelecida com sucesso!');
-        connection.release()
-    } catch (err) {
-        console.error('Erro ao conectar ao banco de dados:' .err)
-    }
-})();
+});
+    (async () => {
+        try {
+            const connection = await db.getConnection();
+            console.log('Conexão com o banco de dados estabelecida com sucesso!');
+            connection.release()
+        } catch (err) {
+            console.error('Erro ao conectar ao banco de dados:'.err)
+        }
+    })();
 
 module.exports = db;

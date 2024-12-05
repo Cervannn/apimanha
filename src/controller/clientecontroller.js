@@ -14,45 +14,99 @@ const clienteSchema = Joi.object({
     senha: Joi.string().required().max(300)
 })
 
+// Listar todos os clientes
 exports.listarClientes = async (req, res) => {
-    try{
-        const [result] = await db.query('SELECT * FROM cliente')
-        res.json(result)
+    try {
+        const [result] = await db.query('SELECT * FROM CLIENTE')
+        res.json(result); // Aqui retornamos apenas os dados da cunsulta
+
     } catch (err) {
-        console.error('Erro ao bucar clientes:', err)
-        res.status(500).json({error: 'erro interino do servidor'})
+        console.error('Erro ao buscar cliente:', err);
+        res.status(500).json({ error: 'Erro interno do servidor' });
+
     }
+
 }
-exports.listarClientespf = async (req, res) =>{
-    const { cpf } = req.paramas
-    try{
-        const [result] = await db.query('SELECT * FROM cliente WHERE cpf = ?', [cpf])
+
+//Buscar um cliente por cpf
+
+exports.listarClientesCpf = async (req, res) => {
+    const { cpf } = req.params;
+    try {
+        const [result] = await db.query('SELECT * FROM cliente WHERE cpf =?', [cpf]);
         if (result.length === 0) {
-            return res.status(404).json({ error: 'Cliente não encontrado'})
+            return res.status(404).json({ error: 'Cliente não encontrado' });
+
         }
-        res.json(result[0])
+        res.json(result[0]);
     } catch (err) {
-        console.error('Erro ao buscar cliente:', err)
-        res.status(500).json({ error: 'Erro interno do servidor'})
+        console.error('Eroo ao buscar cliente:', err);
+        res.status(500).json({ error: 'Erro interno do servidor' });
+
     }
 }
 
-exports.adicionarCliente = async (req, res) => {
-    const { cpf, nome, endereco, bairro, cidade, cep, telefone, email, senha} = req.body
-    const { error } = clienteSchema.validate({ cpf, nome, endereco, bairro, cidade, cep, telefone, email, senha})
-    if (error){
-        return res.status(400).json({ error: error.details[0].message})
-    }
-}
-exports.adicionarCliente = async (req, res) => {
-}
-try {
-    const hash = await bcrypt.hash(senha, 10)
-    const novoCliente = {cpf, nome, endereco, bairro, cidade, cep, telefone, email, senha: hash}
-    await db.query('INSERT INTO cliente SET ?', novoCliente)
+//adicinar novo cliente
+exports.adicinarCliente = async (req, res) => {
+    const { cpf, nome, endereco, bairro, cidade, cep, telefone, email, senha } = req.body;
+    //validação de dados
 
-    res.json({ message: 'Cliente adicionado com sucesso'})
-} catch (err) {
-    console.error('Erro ao adicionar cliente:', err)
-    res.status(500).json({error: 'Erro ao adicionar cliente'})
-}
+    const { error } = clienteSchema.validade({ cpf, nome, endereco, bairro, cidade, cep, telefone, email, senha });
+    if (error) {
+        return res.status(400).json({ error: error.details[0].message });
+
+    }
+    try {
+        const hash = await bcrypt.hash(senha, 10);
+        const novoCliente = { cpf, nome, endereco, bairro, cidade, cep, telefone, email, senha: hash };
+        await db.query('INSERT INTO cliente SET ?', novoCliente);
+
+        res.json({ message: 'Cliente adicionado om sucesso' });
+
+    } catch (err) {
+        console.error('Erro ao adicionar clietne:', err);
+        res.status(500).json({ error: 'Erro ao adicionar cliente' });
+
+    }
+};
+
+//Atualizar um cliente
+
+exports.atualizarCliente = async (req, res) => {
+    const { cpf } = req.params
+    const { nome, endereco, bairro, cidade, cep, telefone, email, senha } = req.body;
+    const { error } = clienteSchema.validate({ cpf, nome, endereco, bairro, cidade, cep, telefone, email, senha });
+    if (error) {
+        return res.status(400).json({ error: error.details[0].message })
+    }
+    try {
+        const [result] = await db.query('SELECT * FROM cliente WHERE cpf = ?', [cpf]);
+        if (result.length === 0) {
+            return res.status(404).json({ error: 'Cliente não encontrado' });
+        }
+        //Criptografando senhas
+        const hash = await bcrypt.hash(senha, 10);
+        const clienteatualizado = { cpf, nome, endereco, bairro, cidade, cep, telefone, email, senha: hash };
+        await db.query('UPDATE cliente SET ? WHERE cpf = ?', [clienteatualizado, cpf]);
+        res.json({ message: 'Cliente atualizado com sucesso' });
+    } catch (err) {
+        console.error('Erro ao atualizar cliente:', err);
+        res.status(500).json({ error: 'Erro ao atualizar clienete' });
+    }
+};
+
+//Deletar cliente
+exports.deletarCliente = async (req, res) => {
+    const { cpf } = req.params;
+    try {
+        const [result] = await db.query('SELECT * FROM cliente WHERE cpf = ?', [cpf]);
+        if (result.length === 0) {
+            return res.status(404).json({ error: 'Cliente não encontrado' });
+        }
+        await db.query('DELETE FROM cliente WHERE cpf = ?', [cpf]);
+        res.json({ message: 'Cliente deletado com sucesso' });
+    } catch (err) {
+        console.error('Erro ao deletar cliente:', err)
+        res.status(500).json({ error: 'Erro ao deletar cliente' })
+    }
+};
