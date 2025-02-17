@@ -51,7 +51,7 @@ exports.adicinarCliente = async (req, res) => {
     const { cpf, nome, endereco, bairro, cidade, cep, telefone, email, senha } = req.body;
     //validação de dados
 
-    const { error } = clienteSchema.validade({ cpf, nome, endereco, bairro, cidade, cep, telefone, email, senha });
+    const { error } = clienteSchema.validate({ cpf, nome, endereco, bairro, cidade, cep, telefone, email, senha });
     if (error) {
         return res.status(400).json({ error: error.details[0].message });
 

@@ -3,10 +3,10 @@ const db = require('../db/db')
 const Joi = require('joi')
 
 const produtoSchema = Joi.object({
-    idProduto: Joi.string().length(30).required().max(50),
+    idProduto: Joi.string().required().max(50),
     nomeProduto: Joi.string().required(),
     tipo: Joi.string().required().max(30),
-    descrica: Joi.string().required().max(30),
+    descricao: Joi.string().required().max(30),
     valorUnit: Joi.string().required(),
     imagem: Joi.string().required()
 })
@@ -45,7 +45,7 @@ exports.listaProdutosID = async (req, res) => {
 exports.adicionarprodutos = async (req, res) => {
     const { idProduto, nomeProduto, tipo, descricao, valorUnit, imagem } = req.body;
 
-    const { error } = produtoSchema.validade({ idProduto, nomeProduto, tipo, descricao, valorUnit, imagem });
+    const { error } = produtoSchema.validate({ idProduto, nomeProduto, tipo, descricao, valorUnit, imagem });
     if (error) {
         return res.status(400).json({ error: error.details[0].message })
     }
